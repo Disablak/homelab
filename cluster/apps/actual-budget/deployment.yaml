@@ -20,6 +20,13 @@ spec:
           image: actualbudget/actual-server:latest
           ports:
             - containerPort: 5006
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           volumeMounts:
             - name: data
               mountPath: /data
