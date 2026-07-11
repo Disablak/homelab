@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: cloudflared
+data:
+  config.yaml: |
+    tunnel: 301646ed-9c91-40ab-8766-6c95b5863790
+    credentials-file: /etc/cloudflared/creds/credentials.json
+    metrics: 0.0.0.0:2000
+    no-autoupdate: true
+
+    # Routing rules: which public hostname maps to which in-cluster service.
+    # Add a new block per service, keep the http_status:404 catch-all last.
+    ingress:
+      - hostname: budget.disablak.xyz
+        service: http://actual-budget.actual-budget.svc.cluster.local:5006
+      - service: http_status:404
