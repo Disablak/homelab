@@ -1,17 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root
+  name: infra
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/Disablak/homelab
     targetRevision: main
-    path: cluster
+    path: cluster/infra
     directory:
-      recurse: true
-      include: '{argocd.yaml,apps/*.yaml,infra/*.yaml}'
+      recurse: false
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
