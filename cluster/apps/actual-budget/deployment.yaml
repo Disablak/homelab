@@ -20,6 +20,23 @@ spec:
           image: actualbudget/actual-server:latest
           ports:
             - containerPort: 5006
+          env:
+            - name: ACTUAL_OPENID_DISCOVERY_URL
+              value: https://accounts.google.com/.well-known/openid-configuration
+            - name: ACTUAL_OPENID_SERVER_HOSTNAME
+              value: https://budget.disablak.xyz
+            - name: ACTUAL_OPENID_AUTH_METHOD
+              value: openid
+            - name: ACTUAL_OPENID_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-oidc
+                  key: client-id
+            - name: ACTUAL_OPENID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-oidc
+                  key: client-secret
           resources:
             requests:
               cpu: 100m
