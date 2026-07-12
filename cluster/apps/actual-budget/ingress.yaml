@@ -3,10 +3,26 @@ kind: Ingress
 metadata:
   name: actual-budget
   namespace: actual-budget
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - budget.disablak.xyz
+      secretName: actual-budget-tls
   rules:
     - host: budget.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: actual-budget
+                port:
+                  number: 5006
+    - host: budget.disablak.xyz
       http:
         paths:
           - path: /

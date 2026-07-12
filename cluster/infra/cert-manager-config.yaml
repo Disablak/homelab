@@ -1,20 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudflared
+  name: cert-manager-config
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/Disablak/homelab
     targetRevision: main
-    path: cluster/infra/cloudflared
+    path: cluster/infra/cert-manager-config
   destination:
     server: https://kubernetes.default.svc
-    namespace: cloudflared
+    namespace: cert-manager
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
