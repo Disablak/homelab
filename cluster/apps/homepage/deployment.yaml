@@ -38,6 +38,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
+            - name: logs
+              mountPath: /app/config/logs
           livenessProbe:
             httpGet:
               path: /api/healthcheck
@@ -48,3 +50,5 @@ spec:
         - name: config
           configMap:
             name: homepage-config
+        - name: logs
+          emptyDir: {}
