@@ -26,9 +26,9 @@ data:
           cpu: true
           memory: true
           showLabel: true
-          label: "cluster"
+          label: "disablak"
         nodes:
-          show: true
+          show: false
   docker.yaml: ""
   custom.css: ""
   custom.js: ""
