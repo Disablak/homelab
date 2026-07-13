@@ -51,4 +51,5 @@ spec:
           configMap:
             name: homepage-config
         - name: logs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 1Gi
