@@ -1,24 +1,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: actual-budget
-  namespace: actual-budget
+  name: homepage
+  namespace: homepage
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    traefik.ingress.kubernetes.io/router.middlewares: homepage-homepage-basic-auth@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - budget.disablak.xyz
-      secretName: actual-budget-tls
+        - home.disablak.xyz
+      secretName: homepage-tls
   rules:
-    - host: budget.disablak.xyz
+    - host: home.disablak.xyz
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: actual-budget
+                name: homepage
                 port:
-                  number: 5006
+                  number: 3000
