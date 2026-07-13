@@ -12,9 +12,9 @@ data:
     background:
       image: https://images.wallpapersden.com/image/download/beautiful-landscape_bGplZWyUmZqaraWkpJRnamtlrWZpaWU.jpg
       blur: sm
-      saturate: 50
-      brightness: 50
-      opacity: 50
+      saturate: 90
+      brightness: 90
+      opacity: 90
     layout:
       Kubernetes:
         style: row
