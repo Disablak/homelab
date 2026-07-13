@@ -38,8 +38,30 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
-            - name: logs
-              mountPath: /app/config/logs
+            - name: config-data
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: config-data
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
+            - name: config-data
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
+            - name: config-data
+              mountPath: /app/config/bookmarks.yaml
+              subPath: bookmarks.yaml
+            - name: config-data
+              mountPath: /app/config/widgets.yaml
+              subPath: widgets.yaml
+            - name: config-data
+              mountPath: /app/config/docker.yaml
+              subPath: docker.yaml
+            - name: config-data
+              mountPath: /app/config/custom.css
+              subPath: custom.css
+            - name: config-data
+              mountPath: /app/config/custom.js
+              subPath: custom.js
           livenessProbe:
             httpGet:
               path: /api/healthcheck
@@ -48,8 +70,8 @@ spec:
             periodSeconds: 15
       volumes:
         - name: config
-          configMap:
-            name: homepage-config
-        - name: logs
           emptyDir:
             sizeLimit: 1Gi
+        - name: config-data
+          configMap:
+            name: homepage-config
