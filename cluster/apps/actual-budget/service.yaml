@@ -3,6 +3,13 @@ kind: Service
 metadata:
   name: actual-budget
   namespace: actual-budget
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Actual Budget"
+    gethomepage.dev/icon: actual-budget.svg
+    gethomepage.dev/href: https://budget.disablak.xyz
+    gethomepage.dev/group: Apps
+    gethomepage.dev/pod-selector: "app=actual-budget"
 spec:
   selector:
     app: actual-budget
