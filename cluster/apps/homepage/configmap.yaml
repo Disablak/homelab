@@ -29,3 +29,6 @@ data:
           label: "cluster"
         nodes:
           show: true
+  docker.yaml: ""
+  custom.css: ""
+  custom.js: ""
