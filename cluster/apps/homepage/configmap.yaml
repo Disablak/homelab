@@ -27,6 +27,13 @@ data:
   bookmarks.yaml: |
     []
   widgets.yaml: |
+    - openmeteo:
+        label: Vinnytsia
+        latitude: 49.2331
+        longitude: 28.4682
+        timezone: Europe/Kyiv
+        units: metric
+        cache: 5
     - kubernetes:
         cluster:
           show: true
