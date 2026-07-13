@@ -9,6 +9,12 @@ data:
     theme: dark
     color: slate
     headerStyle: clean
+    background:
+      image: https://images.wallpapersden.com/image/download/beautiful-landscape_bGplZWyUmZqaraWkpJRnamtlrWZpaWU.jpg
+      blur: sm
+      saturate: 50
+      brightness: 50
+      opacity: 50
     layout:
       Kubernetes:
         style: row
