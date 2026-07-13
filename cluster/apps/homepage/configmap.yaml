@@ -27,6 +27,11 @@ data:
   bookmarks.yaml: |
     []
   widgets.yaml: |
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          hour12: true
     - openmeteo:
         label: Vinnytsia
         latitude: 49.2331
