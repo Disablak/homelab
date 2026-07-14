@@ -39,6 +39,9 @@ data:
         timezone: Europe/Kyiv
         units: metric
         cache: 5
+    - resources:
+        label: SSD
+        disk: /host
     - kubernetes:
         cluster:
           show: true
