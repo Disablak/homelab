@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Nextcloud"
+    gethomepage.dev/icon: nextcloud.svg
+    gethomepage.dev/href: https://cloud.disablak.xyz
+    gethomepage.dev/group: Apps
+    gethomepage.dev/pod-selector: "app=nextcloud"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - cloud.disablak.xyz
+      secretName: nextcloud-tls
+  rules:
+    - host: cloud.disablak.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  number: 80
