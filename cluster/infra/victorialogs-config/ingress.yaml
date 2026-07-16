@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: victorialogs
+  namespace: victorialogs
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    traefik.ingress.kubernetes.io/router.middlewares: victorialogs-victorialogs-basic-auth@kubernetescrd
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "VictoriaLogs"
+    gethomepage.dev/group: Apps
+    gethomepage.dev/href: https://logs.disablak.xyz
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - logs.disablak.xyz
+      secretName: victorialogs-tls
+  rules:
+    - host: logs.disablak.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: victorialogs
+                port:
+                  number: 9428

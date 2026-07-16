@@ -1,0 +1,8 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: victorialogs-basic-auth
+  namespace: victorialogs
+spec:
+  basicAuth:
+    secret: victorialogs-basic-auth
