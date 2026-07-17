@@ -10,6 +10,7 @@ metadata:
     gethomepage.dev/name: "VictoriaLogs"
     gethomepage.dev/group: Apps
     gethomepage.dev/href: https://logs.disablak.xyz
+    gethomepage.dev/pod-selector: "app.kubernetes.io/instance=victorialogs"
 spec:
   ingressClassName: traefik
   tls:
