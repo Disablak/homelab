@@ -8,6 +8,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: victorialogs-victorialogs-redirect-vmui@kubernetescrd,victorialogs-victorialogs-basic-auth@kubernetescrd
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "VictoriaLogs"
+    gethomepage.dev/icon: victorialogs.svg
     gethomepage.dev/group: Apps
     gethomepage.dev/href: https://logs.disablak.xyz
     gethomepage.dev/pod-selector: "app.kubernetes.io/instance=victorialogs"
