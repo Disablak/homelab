@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: victorialogs-redirect-vmui
+  namespace: victorialogs
+spec:
+  redirectRegex:
+    regex: ^https://logs\.disablak\.xyz/?$
+    replacement: https://logs.disablak.xyz/select/vmui/
+    permanent: true
