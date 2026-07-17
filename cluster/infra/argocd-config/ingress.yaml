@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    traefik.ingress.kubernetes.io/router.middlewares: argocd-argocd-basic-auth@kubernetescrd
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "ArgoCD"
+    gethomepage.dev/icon: argo-cd.svg
+    gethomepage.dev/href: https://argocd.disablak.xyz
+    gethomepage.dev/group: Apps
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=argocd-server"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - argocd.disablak.xyz
+      secretName: argocd-tls
+  rules:
+    - host: argocd.disablak.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
