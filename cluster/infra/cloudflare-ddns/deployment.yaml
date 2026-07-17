@@ -23,7 +23,7 @@ spec:
                   name: cloudflare-dns-api-token
                   key: api-token
             - name: DOMAINS
-              value: budget.disablak.xyz,home.disablak.xyz,cloud.disablak.xyz,logs.disablak.xyz
+              value: budget.disablak.xyz,home.disablak.xyz,cloud.disablak.xyz,logs.disablak.xyz,argocd.disablak.xyz
             - name: PROXIED
               value: "false"
             - name: IP6_PROVIDER
