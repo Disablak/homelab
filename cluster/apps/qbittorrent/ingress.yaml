@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qbittorrent
+  namespace: qbittorrent
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "qBittorrent"
+    gethomepage.dev/icon: qbittorrent.svg
+    gethomepage.dev/href: https://qbittorrent.disablak.xyz
+    gethomepage.dev/group: Media
+    gethomepage.dev/pod-selector: "app=qbittorrent"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - qbittorrent.disablak.xyz
+      secretName: qbittorrent-tls
+  rules:
+    - host: qbittorrent.disablak.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent
+                port:
+                  number: 8080

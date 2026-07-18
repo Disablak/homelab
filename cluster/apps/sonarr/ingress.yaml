@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarr
+  namespace: sonarr
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Sonarr"
+    gethomepage.dev/icon: sonarr.svg
+    gethomepage.dev/href: https://sonarr.disablak.xyz
+    gethomepage.dev/group: Media
+    gethomepage.dev/pod-selector: "app=sonarr"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - sonarr.disablak.xyz
+      secretName: sonarr-tls
+  rules:
+    - host: sonarr.disablak.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sonarr
+                port:
+                  number: 8989
