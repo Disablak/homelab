@@ -16,9 +16,9 @@ data:
     seta sv_maxRate "25000"
     seta g_allowvote "1"
 
-    // no forced bots; add manually via rcon if desired
+    // fill empty slots with bots (they leave as real players join)
     seta bot_enable "1"
-    seta bot_minplayers "0"
+    seta bot_minplayers "4"
 
     // map rotation: q3dm17 -> q3dm6 -> q3dm7 -> repeat
     set d1 "map q3dm17 ; set nextmap vstr d2"
