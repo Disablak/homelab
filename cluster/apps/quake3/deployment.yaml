@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quake3
+  namespace: quake3
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: quake3
+  template:
+    metadata:
+      labels:
+        app: quake3
+    spec:
+      containers:
+        - name: quake3
+          image: florianpiesche/ioquake3-server:latest
+          ports:
+            - containerPort: 27960
+              protocol: UDP
+          env:
+            - name: SERVER_MOTD
+              value: "disablak homelab q3"
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: quake3-rcon
+                  key: rconpassword
+            # common.cfg is always exec'd first by the entrypoint; server.cfg
+            # (from the ConfigMap, copied into baseq3) overrides it afterwards.
+            - name: SERVER_ARGS
+              value: "+set dedicated 2 +set net_port 27960 +set com_hunkMegs 64 +exec server.cfg"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            # Must be read-write: the entrypoint copies configs into baseq3 on boot.
+            - name: baseq3
+              mountPath: /opt/quake3/baseq3
+            - name: config
+              mountPath: /opt/quake3/configs
+      volumes:
+        - name: baseq3
+          hostPath:
+            path: /home/max/quake3/baseq3
+            type: Directory
+        - name: config
+          configMap:
+            name: quake3-config

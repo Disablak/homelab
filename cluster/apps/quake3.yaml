@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: quake3
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Disablak/homelab
+    targetRevision: main
+    path: cluster/apps/quake3
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: quake3
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
