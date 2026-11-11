@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quake3-stats
+  namespace: quake3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quake3-stats
+  template:
+    metadata:
+      labels:
+        app: quake3-stats
+    spec:
+      containers:
+        - name: quake3-stats
+          image: node:20-alpine
+          command: ["node", "/app/server.js"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QUAKE_HOST
+              value: "quake3-lan"      # in-cluster service of the game server
+            - name: QUAKE_PORT
+              value: "27960"
+            - name: PORT
+              value: "8080"
+            - name: POLL_MS
+              value: "5000"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 96Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          volumeMounts:
+            - name: app
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: app
+          configMap:
+            name: quake3-stats-app

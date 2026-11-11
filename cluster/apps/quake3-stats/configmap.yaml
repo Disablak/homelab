@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quake3-stats-app
+  namespace: quake3
+data:
+  # Dependency-free Node app. Speaks the Quake 3 "getstatus" connectionless
+  # UDP query directly, so it runs on a stock node:alpine image with no build
+  # step and no registry. Code is mounted read-only at /app.
+  server.js: |
+    'use strict';
+    const dgram = require('dgram');
+    const http = require('http');
+
+    const QUAKE_HOST = process.env.QUAKE_HOST || 'quake3-lan';
+    const QUAKE_PORT = parseInt(process.env.QUAKE_PORT || '27960', 10);
+    const PORT = parseInt(process.env.PORT || '8080', 10);
+    const POLL_MS = parseInt(process.env.POLL_MS || '5000', 10);
+
+    // Latest snapshot, refreshed by the background poller.
+    let state = { online: false, updatedAt: 0 };
+    let currentMap = null;
+    let mapStartedAt = 0; // epoch ms when the current map first appeared
+
+    const GAMETYPES = {
+      0: 'Free For All', 1: 'Tournament', 2: 'Single Player',
+      3: 'Team Deathmatch', 4: 'Capture the Flag',
+      5: 'One Flag CTF', 6: 'Overload', 7: 'Harvester',
+    };
+
+    function stripColors(s) { return String(s).replace(/\^./g, ''); }
+
+    function parseStatus(buf) {
+      // Drop the 4-byte 0xff connectionless header.
+      const s = buf.slice(4).toString('utf8');
+      const lines = s.split('\n');
+      // lines[0] = "statusResponse", lines[1] = "\key\val\key\val...", then players.
+      const info = {};
+      const parts = (lines[1] || '').split('\\');
+      for (let i = 1; i + 1 < parts.length; i += 2) info[parts[i]] = parts[i + 1];
+      const players = [];
+      for (let i = 2; i < lines.length; i++) {
+        const ln = lines[i].trim();
+        if (!ln) continue;
+        const m = ln.match(/^(-?\d+)\s+(\d+)\s+"(.*)"$/);
+        if (m) players.push({ score: +m[1], ping: +m[2], name: stripColors(m[3]) });
+      }
+      return { info, players };
+    }
+
+    function queryStatus(timeout = 1500) {
+      return new Promise((resolve, reject) => {
+        const sock = dgram.createSocket('udp4');
+        const msg = Buffer.concat([Buffer.from([0xff, 0xff, 0xff, 0xff]), Buffer.from('getstatus\n')]);
+        let done = false;
+        const finish = (fn, arg) => { if (!done) { done = true; clearTimeout(t); try { sock.close(); } catch (e) {} fn(arg); } };
+        const t = setTimeout(() => finish(reject, new Error('timeout')), timeout);
+        sock.on('message', (data) => finish(resolve, parseStatus(data)));
+        sock.on('error', (e) => finish(reject, e));
+        sock.send(msg, QUAKE_PORT, QUAKE_HOST, (e) => { if (e) finish(reject, e); });
+      });
+    }
+
+    async function poll() {
+      try {
+        const { info, players } = await queryStatus();
+        const map = info.mapname || null;
+        if (map !== currentMap) { currentMap = map; mapStartedAt = Date.now(); }
+        players.sort((a, b) => b.score - a.score);
+        state = {
+          online: true,
+          updatedAt: Date.now(),
+          hostname: stripColors(info.sv_hostname || QUAKE_HOST),
+          map,
+          gametype: GAMETYPES[info.g_gametype] || ('type ' + info.g_gametype),
+          maxclients: parseInt(info.sv_maxclients || '0', 10) || null,
+          mapStartedAt,
+          players,
+        };
+      } catch (e) {
+        state = { online: false, updatedAt: Date.now(), error: e.message };
+      }
+    }
+
+    poll();
+    setInterval(poll, POLL_MS);
+
+    const PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Quake 3 Server Monitor</title>
+    <style>
+      :root{--bg:#0f0f11;--card:#1a1a1f;--line:#2a2a32;--fg:#e7e7ea;--muted:#8a8a95;--accent:#e8a33d;--green:#57c15a;--red:#e0564b}
+      *{box-sizing:border-box}
+      body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+      .wrap{max-width:760px;margin:0 auto;padding:24px 16px}
+      h1{font-size:20px;margin:0 0 4px}
+      .sub{color:var(--muted);font-size:13px}
+      .status{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+      .dot{width:9px;height:9px;border-radius:50%}
+      .on{background:var(--green)} .off{background:var(--red)}
+      .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+      .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+      .card .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+      .card .v{font-size:18px;margin-top:4px;font-weight:600}
+      table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+      th,td{padding:10px 14px;text-align:left}
+      th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+      tbody tr+tr td{border-top:1px solid var(--line)}
+      td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+      .rank{color:var(--accent);font-weight:700}
+      .empty{color:var(--muted);padding:20px 14px}
+      footer{color:var(--muted);font-size:12px;margin-top:14px}
+    </style></head><body><div class="wrap">
+      <h1 id="host">Quake 3 Server</h1>
+      <div class="status"><span id="dot" class="dot off"></span><span id="statustext" class="sub">connecting…</span></div>
+      <div class="cards">
+        <div class="card"><div class="k">Map</div><div class="v" id="map">—</div></div>
+        <div class="card"><div class="k">Gametype</div><div class="v" id="gt">—</div></div>
+        <div class="card"><div class="k">Time on map</div><div class="v" id="time">—</div></div>
+      </div>
+      <table><thead><tr><th class="num">#</th><th>Player</th><th class="num">Frags</th><th class="num">Ping</th></tr></thead>
+        <tbody id="rows"></tbody></table>
+      <footer>Auto-refreshes every 3s. "Frags" is the server-reported score; the Q3 query protocol does not expose deaths. "Time on map" is measured from the last map change.</footer>
+    </div><script>
+      let mapStartedAt = 0;
+      function fmt(ms){ if(!ms) return '—'; const s=Math.floor((Date.now()-ms)/1000); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+      async function load(){
+        try{
+          const r = await fetch('/api/status'); const d = await r.json();
+          const dot=document.getElementById('dot'), st=document.getElementById('statustext');
+          if(!d.online){ dot.className='dot off'; st.textContent='server offline'+(d.error?(' ('+d.error+')'):''); return; }
+          dot.className='dot on'; st.textContent='online · updated just now';
+          document.getElementById('host').textContent=d.hostname||'Quake 3 Server';
+          document.getElementById('map').textContent=d.map||'—';
+          document.getElementById('gt').textContent=d.gametype||'—';
+          mapStartedAt=d.mapStartedAt||0;
+          const rows=document.getElementById('rows');
+          if(!d.players||!d.players.length){ rows.innerHTML='<tr><td colspan="4" class="empty">No players connected.</td></tr>'; }
+          else { rows.innerHTML=d.players.map((p,i)=>'<tr><td class="num rank">'+(i+1)+'</td><td>'+esc(p.name)+'</td><td class="num">'+p.score+'</td><td class="num">'+p.ping+'</td></tr>').join(''); }
+        }catch(e){ document.getElementById('statustext').textContent='monitor error'; }
+      }
+      function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+      function tick(){ document.getElementById('time').textContent=fmt(mapStartedAt); }
+      load(); setInterval(load,3000); setInterval(tick,1000);
+    </script></body></html>`;
+
+    http.createServer((req, res) => {
+      if (req.url === '/api/status') {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify(state));
+      } else if (req.url === '/healthz') {
+        res.writeHead(200); res.end('ok');
+      } else {
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        res.end(PAGE);
+      }
+    }).listen(PORT, () => console.log('quake3-stats on :' + PORT + ' -> ' + QUAKE_HOST + ':' + QUAKE_PORT));
