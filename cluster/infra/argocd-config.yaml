@@ -16,5 +16,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: true  # ingress disabled, app has no resources
     syncOptions:
       - CreateNamespace=true
