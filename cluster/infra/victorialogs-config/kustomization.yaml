@@ -3,6 +3,6 @@ kind: Kustomization
 resources:
   - middleware.yaml
   - redirect-middleware.yaml
-  - ingress.yaml
+  # - ingress.yaml  # ingress disabled
 generators:
   - secret-generator.yaml

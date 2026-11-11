@@ -7,6 +7,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
+  # - ingress.yaml  # ingress disabled
 generators:
   - secret-generator.yaml
