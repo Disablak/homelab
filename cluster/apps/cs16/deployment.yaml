@@ -60,6 +60,9 @@ spec:
             - name: addons
               mountPath: /hlds/cstrike/reunion.cfg
               subPath: reunion.cfg
+            - name: addons
+              mountPath: /hlds/cstrike/maps/fy_pool_day.bsp
+              subPath: maps/fy_pool_day.bsp
       volumes:
         - name: addons
           emptyDir: {}
