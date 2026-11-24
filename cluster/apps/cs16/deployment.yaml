@@ -54,6 +54,12 @@ spec:
               subPath: liblist.gam
             - name: addons
               mountPath: /hlds/cstrike/addons
+            - name: addons
+              mountPath: /hlds/engine_i486.so
+              subPath: rehlds/engine_i486.so
+            - name: addons
+              mountPath: /hlds/cstrike/reunion.cfg
+              subPath: reunion.cfg
       volumes:
         - name: addons
           emptyDir: {}
