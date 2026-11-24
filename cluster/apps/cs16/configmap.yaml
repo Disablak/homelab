@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cs16-config
+  namespace: cs16
+data:
+  server.cfg: |
+    hostname "disablak homelab cs"
+    sv_lan 0
+    mp_timelimit 20
+    mp_friendlyfire 0
+    mp_autoteambalance 1
+    sv_password ""
+  mapcycle.txt: |
+    de_dust2
+    de_inferno
+    de_nuke
+    de_train
+    cs_office

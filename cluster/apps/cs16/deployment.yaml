@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cs16
+  namespace: cs16
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cs16
+  template:
+    metadata:
+      labels:
+        app: cs16
+    spec:
+      containers:
+        - name: cs16
+          image: febley/counter-strike_server:latest
+          ports:
+            - containerPort: 27015
+              protocol: UDP
+          env:
+            - name: MAP
+              value: de_dust2
+            - name: MAXPLAYERS
+              value: "16"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /hlds/cstrike/server.cfg
+              subPath: server.cfg
+            - name: config
+              mountPath: /hlds/cstrike/mapcycle.txt
+              subPath: mapcycle.txt
+      volumes:
+        - name: config
+          configMap:
+            name: cs16-config
