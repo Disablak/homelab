@@ -11,6 +11,12 @@ data:
     mp_friendlyfire 0
     mp_autoteambalance 1
     sv_password ""
+    // rcon_password is set from the cs16-rcon secret (written by init container).
+    exec addons/rcon.cfg
+    // Ban an IP for 60 min after 5 bad rcon attempts within 30s.
+    sv_rcon_minfailures 5
+    sv_rcon_minfailuretime 30
+    sv_rcon_banpenalty 60
   mapcycle.txt: |
     de_dust2
     de_inferno
@@ -76,6 +82,7 @@ data:
       -e 's/^cid_NoSteam48 = .*/cid_NoSteam48 = 3/' \
       -e "s/^SteamIdHashSalt =.*/SteamIdHashSalt = $(rand)/" \
       reunion.cfg > /addons/reunion.cfg
+    echo "rcon_password \"$RCON_PASSWORD\"" > /addons/rcon.cfg
     cfg=/addons/podbot/podbot.cfg
     # Always exactly 2 bots (min=max, so joining humans don't kick them).
     sed -i -e '/^pb add /d' \

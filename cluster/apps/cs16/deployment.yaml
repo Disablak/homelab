@@ -19,6 +19,12 @@ spec:
         - name: install-addons
           image: alpine:3.22
           command: ["sh", "/config/install-addons.sh"]
+          env:
+            - name: RCON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cs16-rcon
+                  key: rconpassword
           volumeMounts:
             - name: addons
               mountPath: /addons
